@@ -10,7 +10,7 @@
 class Host {
  public:
   Host(unsigned int myId,std::string interface);
-  void send(const char *data);
+  void send(const char *data, unsigned int len);
   void startSniffing(PacketEngine *packetEngine);
   void handlePacket();
 
