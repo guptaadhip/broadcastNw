@@ -37,8 +37,12 @@ void Host::handlePacket() {
       }
       continue;
     }
+    char packet[BUFLEN];
+    bzero(packet, BUFLEN);
+    bcopy(pending->packet + HEADER_LEN, packet, 1024);
     Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
-                  "received a packet");
+                  "received a packet: " + std::string(packet));
+
   }
 }
 
