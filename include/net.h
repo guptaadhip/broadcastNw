@@ -10,6 +10,7 @@ static const int ETHERNET_ADDRESS_LEN = 6;
 /* Ethernet header is 14 bytes */
 static const int ETHERNET_HEADER_LEN = 14;
 
+static const int HEADER_LEN = 60;
 static const int IP_HEADER_LEN = 20;
 static const int ICMP_HEADER_LEN = 8;
 static const int PING_PACKET_LEN = 64;
