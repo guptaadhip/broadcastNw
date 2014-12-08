@@ -1,4 +1,5 @@
 #include "include/Switch.h"
+#include "include/Host.h"
 #include "include/Logger.h"
 #include <string.h>
 #include <iostream>
@@ -9,11 +10,11 @@ int main(int argc, char *argv[]) {
   if (argc < 3) {
     Logger::log(Log::CRITICAL, __FILE__, __FUNCTION__, __LINE__, 
                 "too few arguments");
-  } else if (argc == 4) {
-    if (strncmp(argv[3], "dbg", strlen(argv[3])) == 0) {
+  } else if (argc == 5) {
+    if (strncmp(argv[4], "dbg", strlen(argv[4])) == 0) {
       DEBUG_MODE = true;
     }
-  } else if (argc > 4) {
+  } else if (argc > 5) {
     Logger::log(Log::CRITICAL, __FILE__, __FUNCTION__, __LINE__, 
                 "too many arguments");
   }
@@ -25,7 +26,9 @@ int main(int argc, char *argv[]) {
     Switch mySwitch(myId);
   } else if (role.compare("Host") == 0) {
     Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, "Role: Host");
-    //Host host(myId);
+    Host host(myId, std::string(argv[3]));
+    char data[10];
+    host.send(data);
   } else {
     Logger::log(Log::CRITICAL, __FILE__, __FUNCTION__, __LINE__, 
                 "incorrect role specified");
