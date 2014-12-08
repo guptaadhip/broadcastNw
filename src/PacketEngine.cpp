@@ -1,17 +1,21 @@
 #include "include/PacketEngine.h"
 #include "include/Logger.h"
 #include "include/net.h"
+#include <net/ethernet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <linux/if_packet.h>
 #include <arpa/inet.h>
-#include <string>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <cstring>
 #include <iostream>
 
 using namespace std;
 
 unsigned int bufSize = 33554432;
 
-PacketEngine::PacketEngine(std::string interface, PacketHandler packetHandler) {
+PacketEngine::PacketEngine(std::string interface, PacketHandler *packetHandler){
   const int on = 1;
   interface_ = interface;
   packetHandler_ = packetHandler;
@@ -86,7 +90,7 @@ void PacketEngine::initializeEngine() {
   }
 }
 
-void PacketEngine::forward(const char *packet) {
+void PacketEngine::forward(char *packet, int size) {
   struct sockaddr_ll saddrll;
   memset((void*)&saddrll, 0, sizeof(saddrll));
   saddrll.sll_family = AF_PACKET;
@@ -99,7 +103,7 @@ void PacketEngine::forward(const char *packet) {
   bzero((char *) dest, sizeof(dest));
   memcpy((void*)(saddrll.sll_addr), (void*)dest, 8);
  
-  if (sendto(socketFd_, buffer, size, 0,
+  if (sendto(socketFd_, packet, size, 0,
              (struct sockaddr*)&saddrll, sizeof(saddrll)) < 0) {
     Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
                 "Packet Engine: Error sending Packet");

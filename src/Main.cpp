@@ -1,5 +1,6 @@
 #include "include/Switch.h"
 #include "include/Logger.h"
+#include <string.h>
 #include <iostream>
 
 int main(int argc, char *argv[]) {
