@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     if (strncmp(argv[4], "dbg", strlen(argv[4])) == 0) {
       DEBUG_MODE = true;
     }
-  } else if (argc > 5) {
+  } else if (argc > 7) {
     Logger::log(Log::CRITICAL, __FILE__, __FUNCTION__, __LINE__, 
                 "too many arguments");
   }
@@ -27,8 +27,10 @@ int main(int argc, char *argv[]) {
   } else if (role.compare("Host") == 0) {
     Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, "Role: Host");
     Host host(myId, std::string(argv[3]));
-    char data[10];
-    host.send(data);
+    if (strncmp(argv[6], "send", strlen(argv[6])) == 0) {
+      char data[10];
+      host.send(data);
+    }
   } else {
     Logger::log(Log::CRITICAL, __FILE__, __FUNCTION__, __LINE__, 
                 "incorrect role specified");
