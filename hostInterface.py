@@ -51,7 +51,7 @@ def getKeywords():
 def sendData(client):
   keyword, length = getKeywords()
   data, dataLen = dataEntry()
-  packet = str(length + dataLen) + keyword + data
+  packet = keyword + data
   client.send(packet)
 
 print "Connecting..."
@@ -79,7 +79,7 @@ if os.path.exists( "/tmp/hostSocket" ):
         else:
           print "Invalid Command"
           continue
-        data = client.recv(1024);
+        data = client.recv(1440);
     except KeyboardInterrupt, k:
       print "Shutting down."
   client.close()

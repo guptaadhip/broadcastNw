@@ -49,9 +49,8 @@ void Host::handlePacket() {
 void Host::send(const char *data, unsigned int len) {
   char packet[BUFLEN];
   bzero(packet, BUFLEN);
-  char str[50]="Send the stupid packet";
-  bcopy(str, packet + HEADER_LEN, BUFLEN - HEADER_LEN);
-  packetEngine_->forward(packet, len);
+  bcopy(data, packet + HEADER_LEN, strlen(data));
+  packetEngine_->forward(packet, strlen(data) + HEADER_LEN);
   Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
               "Packet sent");
 }

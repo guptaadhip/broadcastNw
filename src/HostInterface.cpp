@@ -64,7 +64,7 @@ void HostInterface::readSocket() {
     }
     while (!done) {
       bzero(command, sizeof(command));
-      rc = recv(cliSocket_, command, 1024, 0);
+      rc = recv(cliSocket_, command, 1440, 0);
       if (rc <= 0) {
         continue;
       }
@@ -74,8 +74,8 @@ void HostInterface::readSocket() {
                     "quiting");
       } else {
         bzero(pkt.packet, BUFLEN);
-        bcopy(command, pkt.packet, 1024);
-        pkt.len = 1024;
+        bcopy(command, pkt.packet, 1440);
+        pkt.len = 1440;
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
                     "Sending packet");
         host_->send(pkt.packet, BUFLEN);
