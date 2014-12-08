@@ -1,5 +1,6 @@
 #include "include/PacketHandler.h"
 #include "include/Logger.h"
+#include "include/Queue.h"
 #include <cstring>
 
 void PacketHandler::queuePacket(PacketEntry *t) {
@@ -15,7 +16,7 @@ void PacketHandler::queuePacket(PacketEntry *t) {
   }
 }
 
-void PacketHandler::processQueue() {
+void PacketHandler::processQueue(Queue *switchQueue) {
   /* first one needs to be removed */
   (void) packet_in_queue_.exchange(0, std::memory_order_consume);
   while(true) {
@@ -25,7 +26,6 @@ void PacketHandler::processQueue() {
       if( !packet_in_queue_ ) packet_ready_.wait(lock);
       continue;
     }
-    Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
-                "received packet from " + pending->interface);
+    switchQueue->queuePacket(pending);
   }
 }

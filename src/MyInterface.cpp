@@ -23,7 +23,8 @@ void MyInterface::init() {
     if (ifa->ifa_addr->sa_family == AF_INET) { // check it is IP4
       uint32_t ipAddr = ((struct sockaddr_in *)ifa->ifa_addr)->sin_addr.s_addr;
       //if (ipAddr != LOOPBACK_IP && ((ipAddr & 0x0000ffff) != CONTROL_NW_IP)) {
-      if (ipAddr != LOOPBACK_IP) { // This is for the local systems only
+      if ((ipAddr & 0x0000ffff) != CONTROL_NW_IP) {
+      //if (ipAddr != LOOPBACK_IP) { // This is for the local systems only
         std::string interface = string(ifa->ifa_name);
         if (std::find(interfaceList_.begin(), interfaceList_.end(), 
                                  interface) == interfaceList_.end()) {

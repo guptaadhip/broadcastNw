@@ -110,6 +110,37 @@ void PacketEngine::forward(char *packet, int size) {
   }
 }
 
+void PacketEngine::receive() {
+  char packet[BUFLEN];
+  struct sockaddr_ll saddrll;
+  socklen_t senderAddrLen;
+  int rc;
+  
+  /* 
+   * zeroing the sender's address struct.
+   * It will be filled by the recvfrom function.
+   */
+  bzero(packet, BUFLEN);
+  memset((void*)&saddrll, 0, sizeof(saddrll));
+  senderAddrLen = (socklen_t) sizeof(saddrll);
+  
+  
+  while (true) {
+    /* Start receiving the data */
+    rc = recvfrom(socketFd_, packet, BUFLEN, 0,
+                          (struct sockaddr *) &saddrll, &senderAddrLen);
+    
+    if (rc < 0 || saddrll.sll_pkttype == PACKET_OUTGOING) {
+      continue;
+    }
+    PacketEntry *packetEntry = new PacketEntry;
+    bcopy(packet, packetEntry->packet, BUFLEN); 
+    packetEntry->interface = interface_;
+    packetEntry->len = BUFLEN;
+    packetHandler_->queuePacket(packetEntry);
+  }
+}
+
 unsigned short PacketEngine::checksum(unsigned short *addr, int len){ 
   int nleft = len;
   int sum = 0;
