@@ -50,7 +50,7 @@ void HostInterface::readSocket() {
     return;
   }
   while (true) {
-    PacketEntry pkt;
+    char data[BUFLEN];
     bool done = false;
     int rc;
     remoteLen = sizeof(remote);
@@ -73,25 +73,38 @@ void HostInterface::readSocket() {
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
                     "quiting");
       } else if (strncmp(command, "g", 1) == 0) {
-        bzero(pkt.packet, BUFLEN);
+        bzero(data, BUFLEN);
         unsigned int numberOfPackets = 0, lastPacketSize = 0;;
         bcopy(command + sizeof(char), &numberOfPackets, sizeof(unsigned int));
         bcopy(command + sizeof(char) + sizeof(unsigned int), &lastPacketSize, sizeof(unsigned int));
-        bcopy(command + sizeof(char) + (2 * sizeof(unsigned int)), pkt.packet, BUFLEN);
-        pkt.len = BUFLEN;
-        Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-                    "Sending packet " + std::to_string(numberOfPackets + 1) + " times");
+        bcopy(command + sizeof(char) + (2 * sizeof(unsigned int)), data, BUFLEN);
         for(unsigned int i = 0; i < numberOfPackets; i++) {
-        	host_->send(pkt.packet, BUFLEN);
+        	host_->send(data, BUFLEN);
         }
-        pkt.len = lastPacketSize;
         /* Sending last packet now */
-        host_->send(pkt.packet, lastPacketSize);
+        host_->send(data, lastPacketSize);
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-                    "Full Data sent");
+                    "data sent");
+      } else if (strcmp(command, "show packet received counter") == 0) {
+        bzero(data, sizeof(data));
+        sprintf(data, "%u", host_->packetsReceived_); 
+        sendData(data, strlen(data)); 
+      } else if (strcmp(command, "clear packet received counter") == 0) {
+        host_->packetsReceived_ = 0;
+      } else {
+        Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
+                    "invalid command received");
       }
     }
     close(cliSocket_);
+  }
+}
+
+void HostInterface::sendData(char *data, int len) {
+  auto rc = send(cliSocket_, data, len, 0);
+  if (rc < 0) {
+    Logger::log(Log::WARN, __FILE__, __FUNCTION__, __LINE__,
+                "Unable to send data over the socket");
   }
 }
 

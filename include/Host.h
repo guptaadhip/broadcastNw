@@ -13,6 +13,9 @@ class Host {
   void send(const char *data, unsigned int len);
   void startSniffing(PacketEngine *packetEngine);
   void handlePacket();
+  void throughput();
+
+  unsigned int packetsReceived_;
 
  private:
   unsigned int myId_;
@@ -20,4 +23,5 @@ class Host {
   PacketEngine *packetEngine_;
   std::string interface_;
   Queue hostQueue_;
+  unsigned int dataSize_;
 };

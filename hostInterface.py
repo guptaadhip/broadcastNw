@@ -111,6 +111,14 @@ if os.path.exists( "/tmp/hostSocket" ):
         elif "send data" == x:
           sendData(client)
           continue
+        elif "show packet received counter" == x:
+          client.send(x)
+          data = client.recv(1500)
+          print data
+          continue
+        elif "clear packet received counter" == x:
+          client.send(x)
+          continue
         elif "quit" == x:
           print "Shutting down."
           client.send(x)

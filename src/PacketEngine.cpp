@@ -128,7 +128,6 @@ void PacketEngine::receive() {
     
     PacketEntry *packetEntry = new PacketEntry;
     packetEntry->interface = interface_;
-    packetEntry->len = BUFLEN;
     /* Start receiving the data */
     rc = recvfrom(socketFd_, packetEntry->packet, BUFLEN, 0,
                           (struct sockaddr *) &saddrll, &senderAddrLen);
@@ -136,6 +135,7 @@ void PacketEngine::receive() {
     if (rc < 0 || saddrll.sll_pkttype == PACKET_OUTGOING) {
       continue;
     }
+    packetEntry->len = rc;
     packetHandler_->queuePacket(packetEntry);
   }
 }
