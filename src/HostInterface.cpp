@@ -72,13 +72,19 @@ void HostInterface::readSocket() {
         done = true;
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
                     "quiting");
-      } else {
+      } else if (strncmp(command, "g", 1) == 0) {
         bzero(pkt.packet, BUFLEN);
-        bcopy(command, pkt.packet, 1440);
-        pkt.len = 1440;
+        unsigned int numberOfPackets = 0;
+        bcopy(command + sizeof(char), numberOfPackets, sizeof(unsigned int));
+        bcopy(command + sizeof(char) + sizeof(unsigned int), pkt.packet, BUFLEN);
+        pkt.len = BUFLEN;
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-                    "Sending packet");
-        host_->send(pkt.packet, BUFLEN);
+                    "Sending packet " + numberOfPackets + "times");
+        for(int i = 0; i < numberOfPackets; i++) {
+        	host_->send(pkt.packet, BUFLEN);
+        }
+        Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
+                    "Full Data sent");
       }
     }
     close(cliSocket_);
