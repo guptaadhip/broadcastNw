@@ -74,15 +74,18 @@ void HostInterface::readSocket() {
                     "quiting");
       } else if (strncmp(command, "g", 1) == 0) {
         bzero(pkt.packet, BUFLEN);
-        unsigned int numberOfPackets = 0;
-        bcopy(command + sizeof(char), numberOfPackets, sizeof(unsigned int));
-        bcopy(command + sizeof(char) + sizeof(unsigned int), pkt.packet, BUFLEN);
+        unsigned int numberOfPackets = 0, lastPacketSize = 0;;
+        bcopy(command + sizeof(char), &numberOfPackets, sizeof(unsigned int));
+        bcopy(command + sizeof(char) + sizeof(unsigned int), &lastPacketSize, sizeof(unsigned int));
+        bcopy(command + sizeof(char) + (2 * sizeof(unsigned int)), pkt.packet, BUFLEN);
         pkt.len = BUFLEN;
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-                    "Sending packet " + numberOfPackets + "times");
-        for(int i = 0; i < numberOfPackets; i++) {
+                    "Sending packet " + std::to_string(numberOfPackets) + "times");
+        for(int i = 1; i <= (numberOfPackets - 1); i++) {
         	host_->send(pkt.packet, BUFLEN);
         }
+        /* Sending last packet now */
+        host_->send(pkt.packet, lastPacketSize);
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
                     "Full Data sent");
       }
