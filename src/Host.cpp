@@ -5,10 +5,13 @@
 #include <string.h>
 #include "include/Host.h"
 #include "include/HostInterface.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include "include/Logger.h"
 
+
 #define BUFLEN 1500
- 
+namespace pt = boost::posix_time;
+
 Host::Host(unsigned int myId, std::string interface) {
   myId_ = myId;
   interface_= interface;
@@ -23,7 +26,7 @@ Host::Host(unsigned int myId, std::string interface) {
                         &HostInterface::readSocket, hostInterface);
   auto packetThread = std::thread(&Host::handlePacket, this);
   auto sniffThread = std::thread(&Host::startSniffing, this, packetEngine_);
-  //auto throughputThread = std::thread(&Host::throughput, this);
+  auto throughputThread = std::thread(&Host::throughput, this);
   packetHandler_.processQueue(&hostQueue_);
 }
 
@@ -48,7 +51,17 @@ void Host::handlePacket() {
 
 void Host::throughput() {
   while (true) {
+    pt::ptime time_start(pt::microsec_clock::local_time());
     dataSize_ = 0;
+    sleep(1);
+    unsigned int data = dataSize_;
+    pt::ptime time_end(pt::microsec_clock::local_time());
+    pt::time_duration duration(time_end - time_start);
+    auto throughput = (data / duration.total_microseconds()) * 8;
+    if (dataSize_ != 0) {
+      Logger::log(Log::INFO, __FILE__, __FUNCTION__, __LINE__,
+              "Throughput (mbps): " + std::to_string(throughput));
+    }
   }
 }
 

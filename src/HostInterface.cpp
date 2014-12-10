@@ -91,9 +91,6 @@ void HostInterface::readSocket() {
         sendData(data, strlen(data)); 
       } else if (strcmp(command, "clear packet received counter") == 0) {
         host_->packetsReceived_ = 0;
-      } else {
-        Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-                    "invalid command received");
       }
     }
     close(cliSocket_);
