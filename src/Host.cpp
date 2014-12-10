@@ -25,24 +25,21 @@ Host::Host(unsigned int myId, std::string interface) {
 }
 
 void Host::handlePacket() {
-  /* first one needs to be removed */
-  (void) hostQueue_.packet_in_queue_.exchange(0, std::memory_order_consume);
+  int packetCounter = 0;
   while(true) {
-    auto pending = hostQueue_.packet_in_queue_.exchange(0, 
-                                                    std::memory_order_consume);
-    if( !pending ) { 
-      std::unique_lock<std::mutex> lock (hostQueue_.packet_ready_mutex_); 
-      if( !hostQueue_.packet_in_queue_) {
-        hostQueue_.packet_ready_.wait(lock);
-      }
-      continue;
-    }
-    char packet[BUFLEN];
-    bzero(packet, BUFLEN);
-    bcopy(pending->packet + HEADER_LEN, packet, 1024);
-    Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
-                  "received a packet: " + std::string(packet));
+    std::unique_lock<std::mutex> lock(hostQueue_.packet_ready_mutex_);    
+    hostQueue_.packet_ready_.wait(lock);
 
+    while (!hostQueue_.packet_in_queue_.empty()) {
+      packetCounter++;
+      //auto pending = hostQueue_.packet_in_queue_.front();
+      hostQueue_.packet_in_queue_.pop();
+      /*char packet[BUFLEN];
+      bzero(packet, BUFLEN);
+      bcopy(pending->packet + HEADER_LEN, packet, 1440);*/
+      Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
+                  "received a packet: " + std::to_string(packetCounter));
+    }
   }
 }
 
@@ -51,8 +48,8 @@ void Host::send(const char *data, unsigned int len) {
   bzero(packet, BUFLEN);
   bcopy(data, packet + HEADER_LEN, strlen(data));
   packetEngine_->forward(packet, strlen(data) + HEADER_LEN);
-  Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-              "Packet sent");
+  /*Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
+              "Packet sent");*/
 }
 
 /* Effectively the packet engine thread */

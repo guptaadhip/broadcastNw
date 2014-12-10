@@ -31,8 +31,8 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 
 clean:
 	$(rm) $(OBJECTS)
-	rmdir $(OBJDIR)
+	rm -rf $(OBJDIR)
 
 remove: clean
 	$(rm) $(BINDIR)/$(TARGET)
-	rmdir $(BINDIR)
+	rm -rf $(BINDIR)

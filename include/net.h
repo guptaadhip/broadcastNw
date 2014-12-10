@@ -30,7 +30,6 @@ struct PacketEntry {
   char packet[BUFLEN];
   std::string interface;
   unsigned int len;
-  struct PacketEntry *next;
 };
 
 /* Ethernet header */

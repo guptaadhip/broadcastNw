@@ -1,7 +1,10 @@
 import signal, sys
+import math
 import socket
 import struct
 import os, os.path
+from random import choice
+from string import lowercase
 
 publishUidList = []
 subsList = []
@@ -27,7 +30,39 @@ def dataEntry():
     x = x.strip()
     return x, len(x)
   except KeyboardInterrupt, k:
-    return 
+    return
+
+def getSize(dataLen):
+  try:
+    x = raw_input("Amount of data> " )
+    x = x.strip()
+    data = x.split()
+    size = int(data[0])
+    if len(data) == 2:
+      unit = data[1]
+    else:
+      unit = ''
+    if unit == 'Mb' or unit == 'mb':
+      totalSize = size * 1024 * 1024
+    elif unit == 'Gb' or unit == 'gb':
+      totalSize = size * 1024 * 1024 *1024
+    elif unit == 'Kb' or unit == 'kb':
+      totalSize = size * 1024
+    else:
+      # consider size in bytes
+      totalSize = size
+    #find the number of packets
+    count = totalSize / dataLen
+    count = int(math.floor(count))
+    lastSize = int(totalSize - (dataLen * count))
+    return count, lastSize 
+  except:
+    return
+
+def generateData(keywordLen):
+  n = 1440 - keywordLen
+  data = "".join(choice(lowercase) for i in range(n))
+  return data, len(data)
 
 def getKeywords():
   keywords = []
@@ -50,8 +85,12 @@ def getKeywords():
 
 def sendData(client):
   keyword, length = getKeywords()
-  data, dataLen = dataEntry()
-  packet = keyword + data
+  #data, dataLen = dataEntry()
+  data, dataLen = generateData(length)
+  count, lastSize = getSize(dataLen)
+  lastSize = lastSize + length
+  print count, lastSize
+  packet = "g" + struct.pack("I", count) + struct.pack("I", lastSize) + keyword + data
   client.send(packet)
 
 print "Connecting..."

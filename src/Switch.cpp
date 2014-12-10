@@ -23,27 +23,23 @@ Switch::Switch(unsigned int myId) {
 }
 
 void Switch::handlePacket() {
-  /* first one needs to be removed */
-  (void) switchQueue_.packet_in_queue_.exchange(0, std::memory_order_consume);
   while(true) {
-    auto pending = switchQueue_.packet_in_queue_.exchange(0, 
-                                                    std::memory_order_consume);
-    if( !pending ) { 
-      std::unique_lock<std::mutex> lock (switchQueue_.packet_ready_mutex_); 
-      if( !switchQueue_.packet_in_queue_) {
-        switchQueue_.packet_ready_.wait(lock);
+    std::unique_lock<std::mutex> lock(switchQueue_.packet_ready_mutex_);    
+    switchQueue_.packet_ready_.wait(lock);
+
+    while (!switchQueue_.packet_in_queue_.empty()) {
+      auto pending = switchQueue_.packet_in_queue_.front();
+      switchQueue_.packet_in_queue_.pop();
+    /*  Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
+                  "got a packet to forward from:" + pending->interface); */
+      for (auto entry : ifToPacketEngine_) {
+        if (entry.first.compare(pending->interface) == 0) {
+          continue;
+        }
+        /* Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
+                  "forwarding to interface: " + entry.first); */
+        entry.second.forward(pending->packet, pending->len);
       }
-      continue;
-    }
-    Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
-                  "got a packet to forward from:" + pending->interface);
-    for (auto entry : ifToPacketEngine_) {
-      if (entry.first.compare(pending->interface) == 0) {
-        continue;
-      }
-      Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__, 
-                  "forwarding to interface: " + entry.first);
-      entry.second.forward(pending->packet, pending->len);
     }
   }
 }

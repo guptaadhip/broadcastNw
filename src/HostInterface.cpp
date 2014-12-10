@@ -80,10 +80,11 @@ void HostInterface::readSocket() {
         bcopy(command + sizeof(char) + (2 * sizeof(unsigned int)), pkt.packet, BUFLEN);
         pkt.len = BUFLEN;
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,
-                    "Sending packet " + std::to_string(numberOfPackets + 1) + "times");
-        for(int i = 1; i <= numberOfPackets; i++) {
+                    "Sending packet " + std::to_string(numberOfPackets + 1) + " times");
+        for(unsigned int i = 0; i < numberOfPackets; i++) {
         	host_->send(pkt.packet, BUFLEN);
         }
+        pkt.len = lastPacketSize;
         /* Sending last packet now */
         host_->send(pkt.packet, lastPacketSize);
         Logger::log(Log::DEBUG, __FILE__, __FUNCTION__, __LINE__,

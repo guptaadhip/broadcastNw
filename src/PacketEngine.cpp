@@ -115,7 +115,7 @@ void PacketEngine::receive() {
   struct sockaddr_ll saddrll;
   socklen_t senderAddrLen;
   int rc;
-  
+
   /* 
    * zeroing the sender's address struct.
    * It will be filled by the recvfrom function.
@@ -124,19 +124,18 @@ void PacketEngine::receive() {
   memset((void*)&saddrll, 0, sizeof(saddrll));
   senderAddrLen = (socklen_t) sizeof(saddrll);
   
-  
   while (true) {
+    
+    PacketEntry *packetEntry = new PacketEntry;
+    packetEntry->interface = interface_;
+    packetEntry->len = BUFLEN;
     /* Start receiving the data */
-    rc = recvfrom(socketFd_, packet, BUFLEN, 0,
+    rc = recvfrom(socketFd_, packetEntry->packet, BUFLEN, 0,
                           (struct sockaddr *) &saddrll, &senderAddrLen);
     
     if (rc < 0 || saddrll.sll_pkttype == PACKET_OUTGOING) {
       continue;
     }
-    PacketEntry *packetEntry = new PacketEntry;
-    bcopy(packet, packetEntry->packet, BUFLEN); 
-    packetEntry->interface = interface_;
-    packetEntry->len = BUFLEN;
     packetHandler_->queuePacket(packetEntry);
   }
 }
